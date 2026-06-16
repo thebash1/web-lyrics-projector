@@ -1,17 +1,269 @@
 ---
-
+import LyricEditor from '../components/LyricEditor.astro';
 ---
 
-<html lang="en">
+<html lang="es">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>Web Lyrics Projector</title>
 	</head>
-	<body>
-		<h1>Astro</h1>
+	<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+		<main class="max-w-4xl mx-auto p-8">
+			<header class="mb-12 text-center">
+				<h1 class="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-4">
+					Proyector de Letras
+				</h1>
+				<p class="text-slate-400">Busca una canción en Letras.com y proyéctala en una ventana emergente.</p>
+			</header>
+
+			<section class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl mb-8">
+				<form id="search-form" class="flex flex-col md:flex-row gap-4">
+					<input 
+						type="text" 
+						id="artist-input" 
+						placeholder="Artista (ej. coldplay)" 
+						class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+						required
+					/>
+					<input 
+						type="text" 
+						id="song-input" 
+						placeholder="Canción (ej. yellow)" 
+						class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+						required
+					/>
+					<button 
+						type="submit" 
+						class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+					>
+						Buscar Letra
+					</button>
+				</form>
+				<div id="loading-indicator" class="hidden text-center mt-4 text-blue-400">
+					Buscando letras...
+				</div>
+				<div id="error-message" class="hidden text-center mt-4 text-red-400"></div>
+			</section>
+
+			<section class="flex flex-col md:flex-row gap-4 justify-center mb-8">
+				<div class="relative bg-slate-800 border border-slate-700 rounded-xl p-4 flex-1 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-700 transition-all group" onclick="document.getElementById('bg-upload').click()">
+					<input type="file" id="bg-upload" accept="image/*" class="hidden" />
+					<div id="bg-preview" class="w-16 h-16 bg-slate-900 rounded-lg mb-2 bg-cover bg-center border border-slate-600 group-hover:border-blue-400 transition-colors"></div>
+					<span class="text-slate-300 font-medium group-hover:text-white">Cambiar Fondo</span>
+					<span class="text-xs text-slate-500 mt-1">(Se guardará automáticamente)</span>
+				</div>
+				<div class="flex-1 flex flex-col justify-center">
+					<button 
+						id="open-projector-btn" 
+						class="h-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-purple-600/30 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center text-lg"
+					>
+						Abrir Proyector (1920x1080)
+					</button>
+				</div>
+			</section>
+
+			<section id="editor-section" class="hidden">
+				<h2 class="text-2xl font-semibold mb-4 text-slate-200">Editor de Letras</h2>
+				<LyricEditor />
+			</section>
+
+			<div class="fixed bottom-4 right-4 bg-slate-800/80 backdrop-blur border border-slate-700 text-sm px-4 py-2 rounded-lg text-slate-300">
+				Usa <strong>←</strong> y <strong>→</strong> para controlar la proyección
+			</div>
+		</main>
+
+		<script>
+			// Client-side logic for the main page
+			const searchForm = document.getElementById('search-form');
+			const artistInput = document.getElementById('artist-input') as HTMLInputElement;
+			const songInput = document.getElementById('song-input') as HTMLInputElement;
+			const loadingIndicator = document.getElementById('loading-indicator');
+			const errorMessage = document.getElementById('error-message');
+			const openProjectorBtn = document.getElementById('open-projector-btn') as HTMLButtonElement;
+			const editorSection = document.getElementById('editor-section');
+			const bgUpload = document.getElementById('bg-upload') as HTMLInputElement;
+			const bgPreview = document.getElementById('bg-preview') as HTMLDivElement;
+			
+			const channel = new BroadcastChannel('lyrics_channel');
+			
+			let currentVerses = [];
+			let currentSlide = 0;
+			let customBg = localStorage.getItem('custom_bg') || '';
+
+			if (customBg) {
+				bgPreview.style.backgroundImage = `url(${customBg})`;
+			}
+
+			// Handle background image upload
+			bgUpload?.addEventListener('change', (e: any) => {
+				const file = e.target.files[0];
+				if (!file) return;
+
+				const reader = new FileReader();
+				reader.onload = (event) => {
+					const img = new Image();
+					img.onload = () => {
+						// Compress and resize image using canvas
+						const canvas = document.createElement('canvas');
+						// Target 1920x1080 max for projector
+						const maxWidth = 1920;
+						const maxHeight = 1080;
+						let width = img.width;
+						let height = img.height;
+
+						if (width > height) {
+							if (width > maxWidth) {
+								height = Math.round((height * maxWidth) / width);
+								width = maxWidth;
+							}
+						} else {
+							if (height > maxHeight) {
+								width = Math.round((width * maxHeight) / height);
+								height = maxHeight;
+							}
+						}
+
+						canvas.width = width;
+						canvas.height = height;
+						const ctx = canvas.getContext('2d');
+						ctx?.drawImage(img, 0, 0, width, height);
+
+						// Export to base64 jpeg
+						const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+						customBg = dataUrl;
+						
+						try {
+							localStorage.setItem('custom_bg', customBg);
+						} catch (err) {
+							console.error('Failed to save background to localStorage (might be too large)', err);
+							alert('La imagen es demasiado grande. Intenta con una de menor resolución.');
+							return;
+						}
+
+						bgPreview.style.backgroundImage = `url(${customBg})`;
+						channel.postMessage({ type: 'SET_BACKGROUND', image: customBg });
+					};
+					img.src = event.target?.result as string;
+				};
+				reader.readAsDataURL(file);
+			});
+
+			searchForm?.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				const artist = artistInput.value.trim().toLowerCase().replace(/ /g, '-');
+				const song = songInput.value.trim().toLowerCase().replace(/ /g, '-');
+
+				if (!artist || !song) return;
+
+				loadingIndicator?.classList.remove('hidden');
+				errorMessage?.classList.add('hidden');
+				editorSection?.classList.add('hidden');
+
+				try {
+					const res = await fetch(`/api/lyrics/${artist}/${song}`);
+					const data = await res.json();
+
+					if (!res.ok) {
+						throw new Error(data.error || 'Error fetching lyrics');
+					}
+
+					currentVerses = data.verses;
+					currentSlide = 0;
+
+					// Render the editor
+					window.renderEditor(currentVerses);
+					editorSection?.classList.remove('hidden');
+					
+					// Send to projector if open
+					channel.postMessage({ type: 'LYRICS_LOADED', verses: currentVerses });
+					channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
+
+				} catch (err: any) {
+					if (errorMessage) {
+						errorMessage.textContent = err.message;
+						errorMessage.classList.remove('hidden');
+					}
+				} finally {
+					loadingIndicator?.classList.add('hidden');
+				}
+			});
+
+			openProjectorBtn?.addEventListener('click', () => {
+				// Open projector window with fixed dimensions
+				const projector = window.open(
+					'/popup', 
+					'Projector', 
+					'width=1920,height=1080,left=0,top=0'
+				);
+				
+				// Send current lyrics and background once it's loaded
+				if (projector) {
+					// Wait a moment for the window to load
+					setTimeout(() => {
+						if (customBg) {
+							channel.postMessage({ type: 'SET_BACKGROUND', image: customBg });
+						}
+						if (currentVerses.length > 0) {
+							channel.postMessage({ type: 'LYRICS_LOADED', verses: currentVerses });
+							channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
+						}
+					}, 1000);
+				}
+			});
+
+			// Listen for keyboard arrows to control projection
+			window.addEventListener('keydown', (e) => {
+				if (currentVerses.length === 0) return;
+				
+				// Don't trigger if user is typing in inputs
+				if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+
+				if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+					e.preventDefault();
+					if (currentSlide < currentVerses.length - 1) {
+						currentSlide++;
+						channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
+						window.updateActiveVerse(currentSlide);
+					}
+				} else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+					e.preventDefault();
+					if (currentSlide > 0) {
+						currentSlide--;
+						channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
+						window.updateActiveVerse(currentSlide);
+					}
+				}
+			});
+
+			channel.addEventListener('message', (event) => {
+				const data = event.data;
+				if (data.type === 'SYNC_STATE') {
+					currentSlide = data.slideIndex;
+					window.updateActiveVerse(currentSlide);
+				}
+			});
+
+			// Handle custom events from LyricEditor
+			window.addEventListener('update-lyrics', (e: any) => {
+				currentVerses = e.detail.verses;
+				channel.postMessage({ type: 'LYRICS_LOADED', verses: currentVerses });
+				// Keep current slide index in bounds
+				if (currentSlide >= currentVerses.length) {
+					currentSlide = Math.max(0, currentVerses.length - 1);
+				}
+				channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
+			});
+			
+			// Handle user clicking on a verse in the editor
+			window.addEventListener('jump-to-slide', (e: any) => {
+				currentSlide = e.detail.slideIndex;
+				channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
+				window.updateActiveVerse(currentSlide);
+			});
+		</script>
 	</body>
 </html>

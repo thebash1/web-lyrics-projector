@@ -1,0 +1,136 @@
+---
+---
+
+<div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+  <ul id="lyric-list" class="divide-y divide-slate-700 max-h-96 overflow-y-auto">
+    <!-- Items will be injected here via JS -->
+  </ul>
+  <div class="p-4 bg-slate-800 border-t border-slate-700 flex justify-between">
+    <button id="add-verse-btn" class="text-sm bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition-colors">
+      + Añadir Estrofa
+    </button>
+    <button id="save-lyrics-btn" class="text-sm bg-green-600 hover:bg-green-500 text-white px-4 py-1.5 rounded transition-colors shadow-lg shadow-green-600/20">
+      Guardar Cambios
+    </button>
+  </div>
+</div>
+
+<script>
+  const lyricList = document.getElementById('lyric-list');
+  const addVerseBtn = document.getElementById('add-verse-btn');
+  const saveLyricsBtn = document.getElementById('save-lyrics-btn');
+  
+  let editorVerses: { text: string, section: string }[] = [];
+
+  // Expose function globally so index.astro can call it
+  window.renderEditor = (verses: { text: string, section: string }[]) => {
+    // Migrate old strings if any
+    editorVerses = verses.map(v => typeof v === 'string' ? { text: v, section: '' } : v);
+    renderList();
+  };
+
+  window.updateActiveVerse = (index: number) => {
+    if (!lyricList) return;
+    const items = lyricList.querySelectorAll('li');
+    items.forEach((item, i) => {
+      if (i === index) {
+        item.classList.add('bg-blue-900/40', 'border-l-4', 'border-blue-500');
+        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        item.classList.remove('bg-blue-900/40', 'border-l-4', 'border-blue-500');
+      }
+    });
+  };
+
+  function renderList() {
+    if (!lyricList) return;
+    lyricList.innerHTML = '';
+    
+    editorVerses.forEach((verseObj, i) => {
+      const li = document.createElement('li');
+      li.className = 'p-4 hover:bg-slate-700/50 transition-colors flex items-start gap-4 cursor-pointer group border-l-4 border-transparent';
+      
+      const leftCol = document.createElement('div');
+      leftCol.className = 'flex flex-col items-center justify-start min-w-[3rem]';
+
+      const sectionInput = document.createElement('input');
+      sectionInput.type = 'text';
+      sectionInput.value = verseObj.section || '';
+      sectionInput.placeholder = '+ Sección';
+      sectionInput.className = 'text-[10px] text-blue-400 bg-transparent w-full text-center focus:outline-none mb-1 uppercase tracking-wider placeholder-slate-600 focus:bg-slate-800 rounded px-1';
+      sectionInput.addEventListener('input', (e) => {
+        editorVerses[i].section = (e.target as HTMLInputElement).value;
+      });
+      sectionInput.addEventListener('click', (e) => e.stopPropagation());
+
+      const idxSpan = document.createElement('span');
+      idxSpan.className = 'text-xs text-slate-500 font-mono mt-1 text-center select-none';
+      idxSpan.textContent = String(i + 1);
+
+      leftCol.appendChild(sectionInput);
+      leftCol.appendChild(idxSpan);
+
+      const textarea = document.createElement('textarea');
+      textarea.value = verseObj.text;
+      textarea.className = 'flex-1 bg-transparent text-slate-200 border-b border-transparent hover:border-slate-600 focus:border-blue-500 focus:outline-none focus:bg-slate-900/50 rounded px-2 py-1 resize-y min-h-[40px]';
+      textarea.addEventListener('input', (e) => {
+        editorVerses[i].text = (e.target as HTMLTextAreaElement).value;
+      });
+      // Prevent clicking the textarea from firing the li click
+      textarea.addEventListener('click', (e) => e.stopPropagation());
+
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity';
+      
+      const removeBtn = document.createElement('button');
+      removeBtn.innerHTML = '✕';
+      removeBtn.className = 'text-red-400 hover:text-red-300 px-2 py-1 bg-red-400/10 hover:bg-red-400/20 rounded';
+      removeBtn.title = 'Eliminar';
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        editorVerses.splice(i, 1);
+        renderList();
+      });
+
+      actionsDiv.appendChild(removeBtn);
+      
+      li.appendChild(leftCol);
+      li.appendChild(textarea);
+      li.appendChild(actionsDiv);
+
+      li.addEventListener('click', () => {
+        // Jump to this slide
+        window.dispatchEvent(new CustomEvent('jump-to-slide', { detail: { slideIndex: i } }));
+      });
+
+      lyricList.appendChild(li);
+    });
+  }
+
+  addVerseBtn?.addEventListener('click', () => {
+    editorVerses.push({ text: 'Nueva estrofa...', section: '' });
+    renderList();
+    if (lyricList) {
+      setTimeout(() => {
+        lyricList.scrollTop = lyricList.scrollHeight;
+      }, 50);
+    }
+  });
+
+  saveLyricsBtn?.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('update-lyrics', {
+      detail: { verses: editorVerses }
+    }));
+    
+    // Visual feedback
+    const originalText = saveLyricsBtn.textContent;
+    saveLyricsBtn.textContent = '¡Guardado!';
+    saveLyricsBtn.classList.add('bg-green-500');
+    setTimeout(() => {
+      if (saveLyricsBtn) {
+        saveLyricsBtn.textContent = originalText;
+        saveLyricsBtn.classList.remove('bg-green-500');
+      }
+    }, 2000);
+  });
+</script>
