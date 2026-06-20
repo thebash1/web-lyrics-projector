@@ -1,4 +1,4 @@
-import { get, set } from '../../../lib/cache.js';
+import { get, set } from '../lib/cache.js';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -39,8 +39,8 @@ function parseTextLyrics(text) {
   return verses;
 }
 
-export const GET = async ({ params }) => {
-  const slug = params.slug.split('/');
+export async function getLyricsData(slugParam) {
+  const slug = slugParam.split('/');
   const cacheKey = slug.join('/');
 
   const cached = get(cacheKey);

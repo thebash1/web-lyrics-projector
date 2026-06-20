@@ -90,7 +90,7 @@ import LyricEditor from '../components/LyricEditor.astro';
 			
 			const channel = new BroadcastChannel('lyrics_channel');
 			
-			let currentVerses = [];
+			let currentVerses: {text: string, section: string}[] = [];
 			let currentSlide = 0;
 			let customBg = localStorage.getItem('custom_bg') || '';
 
@@ -164,7 +164,7 @@ import LyricEditor from '../components/LyricEditor.astro';
 				editorSection?.classList.add('hidden');
 
 				try {
-					const res = await fetch(`/api/lyrics/${artist}/${song}`);
+					const res = await fetch(`/api/lyrics/search?path=${artist}/${song}`);
 					const data = await res.json();
 
 					if (!res.ok) {
@@ -175,7 +175,7 @@ import LyricEditor from '../components/LyricEditor.astro';
 					currentSlide = 0;
 
 					// Render the editor
-					window.renderEditor(currentVerses);
+					(window as any).renderEditor(currentVerses);
 					editorSection?.classList.remove('hidden');
 					
 					// Send to projector if open
@@ -227,14 +227,14 @@ import LyricEditor from '../components/LyricEditor.astro';
 					if (currentSlide < currentVerses.length - 1) {
 						currentSlide++;
 						channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
-						window.updateActiveVerse(currentSlide);
+						(window as any).updateActiveVerse(currentSlide);
 					}
 				} else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
 					e.preventDefault();
 					if (currentSlide > 0) {
 						currentSlide--;
 						channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
-						window.updateActiveVerse(currentSlide);
+						(window as any).updateActiveVerse(currentSlide);
 					}
 				}
 			});
@@ -243,7 +243,7 @@ import LyricEditor from '../components/LyricEditor.astro';
 				const data = event.data;
 				if (data.type === 'SYNC_STATE') {
 					currentSlide = data.slideIndex;
-					window.updateActiveVerse(currentSlide);
+					(window as any).updateActiveVerse(currentSlide);
 				}
 			});
 
@@ -262,7 +262,7 @@ import LyricEditor from '../components/LyricEditor.astro';
 			window.addEventListener('jump-to-slide', (e: any) => {
 				currentSlide = e.detail.slideIndex;
 				channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
-				window.updateActiveVerse(currentSlide);
+				(window as any).updateActiveVerse(currentSlide);
 			});
 		</script>
 	</body>
