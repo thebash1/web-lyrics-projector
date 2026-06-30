@@ -11,14 +11,4 @@ services:
       - HOST=0.0.0.0
       - PORT=4321
     ports:
-      - "4321":"4321"
-
-  tunnel:
-    image: cloudflare/cloudflared:latest
-    container_name: lyrics-tunnel 
-    restart: always
-    command: tunnel run
-    environment:
-      - TUNNEL_TOKEN=eyJhIjoiYzFjOTllMjg2NjFmYWRhYTE3MDYzMzM1YTc2YzdmMmUiLCJ0IjoiZWJmMmIyMWUtYjFmYi00YjdmLTk1MTMtZjMzMTk2MWIyYTE5IiwicyI6Ik1qVTRNRFV4TUdRdE9USmhNUzAwTlRneUxUZzNaR1F0WVRSaFlUZGhOVEZoWldJNE9HRTBZbVptTTJFdFpqRmtOeTAwWW1ZekxXRm1NMlF0TkRObU9XVTRaV0l5TTJFMCJ9
-    depends_on:
-      - web
+      - "4321:4321"
