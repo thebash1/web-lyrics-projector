@@ -1,5 +1,5 @@
 ---
-import LyricEditor from '../components/LyricEditor.astro';
+import LyricEditor from "../components/LyricEditor.astro";
 ---
 
 <html lang="es">
@@ -14,51 +14,83 @@ import LyricEditor from '../components/LyricEditor.astro';
 	<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
 		<main class="max-w-4xl mx-auto p-8">
 			<header class="mb-12 text-center">
-				<h1 class="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-4">
+				<h1
+					class="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-4"
+				>
 					Proyector de Letras
 				</h1>
-				<p class="text-slate-400">Busca una canción en Letras.com y proyéctala en una ventana emergente.</p>
+				<p class="text-slate-400">
+					Busca una canción y proyéctala en una ventana emergente.
+				</p>
 			</header>
 
-			<section class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl mb-8">
+			<section
+				class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl mb-8"
+			>
 				<form id="search-form" class="flex flex-col md:flex-row gap-4">
-					<input 
-						type="text" 
-						id="artist-input" 
-						placeholder="Artista (ej. coldplay)" 
+					<input
+						type="text"
+						id="artist-input"
+						placeholder="Artista (ej. coldplay)"
 						class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
 						required
 					/>
-					<input 
-						type="text" 
-						id="song-input" 
-						placeholder="Canción (ej. yellow)" 
+					<input
+						type="text"
+						id="song-input"
+						placeholder="Canción (ej. yellow)"
 						class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
 						required
 					/>
-					<button 
-						type="submit" 
+					<button
+						type="submit"
 						class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
 					>
 						Buscar Letra
 					</button>
 				</form>
-				<div id="loading-indicator" class="hidden text-center mt-4 text-blue-400">
+				<div
+					id="loading-indicator"
+					class="hidden text-center mt-4 text-blue-400"
+				>
 					Buscando letras...
 				</div>
-				<div id="error-message" class="hidden text-center mt-4 text-red-400"></div>
+				<div
+					id="error-message"
+					class="hidden text-center mt-4 text-red-400"
+				>
+				</div>
 			</section>
 
-			<section class="flex flex-col md:flex-row gap-4 justify-center mb-8">
-				<div class="relative bg-slate-800 border border-slate-700 rounded-xl p-4 flex-1 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-700 transition-all group" onclick="document.getElementById('bg-upload').click()">
-					<input type="file" id="bg-upload" accept="image/*" class="hidden" />
-					<div id="bg-preview" class="w-16 h-16 bg-slate-900 rounded-lg mb-2 bg-cover bg-center border border-slate-600 group-hover:border-blue-400 transition-colors"></div>
-					<span class="text-slate-300 font-medium group-hover:text-white">Cambiar Fondo</span>
-					<span class="text-xs text-slate-500 mt-1">(Se guardará automáticamente)</span>
+			<section
+				class="flex flex-col md:flex-row gap-4 justify-center mb-8"
+			>
+				<div
+					class="relative bg-slate-800 border border-slate-700 rounded-xl p-4 flex-1 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-700 transition-all group"
+					onclick="document.getElementById('bg-upload').click()"
+				>
+					<input
+						type="file"
+						id="bg-upload"
+						accept="image/*"
+						class="hidden"
+					/>
+					<div
+						id="bg-preview"
+						class="w-16 h-16 bg-slate-900 rounded-lg mb-2 bg-cover bg-center border border-slate-600 group-hover:border-blue-400 transition-colors"
+					>
+					</div>
+					<span
+						class="text-slate-300 font-medium group-hover:text-white"
+						>Cambiar Fondo</span
+					>
+					<span class="text-xs text-slate-500 mt-1"
+						>(Se guardará automáticamente)</span
+					>
 				</div>
 				<div class="flex-1 flex flex-col justify-center">
-					<button 
-						id="open-projector-btn" 
+					<button
+						id="open-projector-btn"
 						class="h-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-purple-600/30 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center text-lg"
 					>
 						Abrir Proyector (1920x1080)
@@ -67,61 +99,103 @@ import LyricEditor from '../components/LyricEditor.astro';
 			</section>
 
 			<section id="editor-section" class="hidden">
-				<h2 class="text-2xl font-semibold mb-4 text-slate-200">Editor de Letras</h2>
+				<h2 class="text-2xl font-semibold mb-4 text-slate-200">
+					Editor de Letras
+				</h2>
 				<LyricEditor />
 			</section>
 
 			<!-- Modal de Selección de Canciones -->
-			<div id="song-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
-				<div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="modal-backdrop"></div>
-				<div class="relative bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl m-4 flex flex-col max-h-[80vh]">
+			<div
+				id="song-modal"
+				class="fixed inset-0 z-50 flex items-center justify-center hidden"
+			>
+				<div
+					class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+					id="modal-backdrop"
+				>
+				</div>
+				<div
+					class="relative bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl m-4 flex flex-col max-h-[80vh]"
+				>
 					<div class="flex justify-between items-center mb-4">
-						<h3 class="text-xl font-bold text-white">Seleccionar Canción</h3>
-						<button id="close-modal-btn" class="text-slate-400 hover:text-white transition-colors">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						<h3 class="text-xl font-bold text-white">
+							Seleccionar Canción
+						</h3>
+						<button
+							id="close-modal-btn"
+							class="text-slate-400 hover:text-white transition-colors"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-6 w-6"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"></path>
 							</svg>
 						</button>
 					</div>
-					<div id="modal-list" class="overflow-y-auto flex-1 pr-2 custom-scrollbar space-y-2">
+					<div
+						id="modal-list"
+						class="overflow-y-auto flex-1 pr-2 custom-scrollbar space-y-2"
+					>
 						<!-- Canciones dinámicas aquí -->
 					</div>
 				</div>
 			</div>
 
-			<div class="fixed bottom-4 right-4 bg-slate-800/80 backdrop-blur border border-slate-700 text-sm px-4 py-2 rounded-lg text-slate-300">
+			<div
+				class="fixed bottom-4 right-4 bg-slate-800/80 backdrop-blur border border-slate-700 text-sm px-4 py-2 rounded-lg text-slate-300"
+			>
 				Usa <strong>←</strong> y <strong>→</strong> para controlar la proyección
 			</div>
 		</main>
 
 		<script>
 			// Client-side logic for the main page
-			const searchForm = document.getElementById('search-form');
-			const artistInput = document.getElementById('artist-input') as HTMLInputElement;
-			const songInput = document.getElementById('song-input') as HTMLInputElement;
-			const loadingIndicator = document.getElementById('loading-indicator');
-			const errorMessage = document.getElementById('error-message');
-			const openProjectorBtn = document.getElementById('open-projector-btn') as HTMLButtonElement;
-			const editorSection = document.getElementById('editor-section');
-			const bgUpload = document.getElementById('bg-upload') as HTMLInputElement;
-			const bgPreview = document.getElementById('bg-preview') as HTMLDivElement;
-			const songModal = document.getElementById('song-modal');
-			const modalList = document.getElementById('modal-list');
-			const closeModalBtn = document.getElementById('close-modal-btn');
-			const modalBackdrop = document.getElementById('modal-backdrop');
-			
-			const channel = new BroadcastChannel('lyrics_channel');
-			
-			let currentVerses: {text: string, section: string}[] = [];
+			const searchForm = document.getElementById("search-form");
+			const artistInput = document.getElementById(
+				"artist-input",
+			) as HTMLInputElement;
+			const songInput = document.getElementById(
+				"song-input",
+			) as HTMLInputElement;
+			const loadingIndicator =
+				document.getElementById("loading-indicator");
+			const errorMessage = document.getElementById("error-message");
+			const openProjectorBtn = document.getElementById(
+				"open-projector-btn",
+			) as HTMLButtonElement;
+			const editorSection = document.getElementById("editor-section");
+			const bgUpload = document.getElementById(
+				"bg-upload",
+			) as HTMLInputElement;
+			const bgPreview = document.getElementById(
+				"bg-preview",
+			) as HTMLDivElement;
+			const songModal = document.getElementById("song-modal");
+			const modalList = document.getElementById("modal-list");
+			const closeModalBtn = document.getElementById("close-modal-btn");
+			const modalBackdrop = document.getElementById("modal-backdrop");
+
+			const channel = new BroadcastChannel("lyrics_channel");
+
+			let currentVerses: { text: string; section: string }[] = [];
 			let currentSlide = 0;
-			let customBg = localStorage.getItem('custom_bg') || '';
+			let customBg = localStorage.getItem("custom_bg") || "";
 
 			if (customBg) {
 				bgPreview.style.backgroundImage = `url(${customBg})`;
 			}
 
 			// Handle background image upload
-			bgUpload?.addEventListener('change', (e: any) => {
+			bgUpload?.addEventListener("change", (e: any) => {
 				const file = e.target.files[0];
 				if (!file) return;
 
@@ -130,7 +204,7 @@ import LyricEditor from '../components/LyricEditor.astro';
 					const img = new Image();
 					img.onload = () => {
 						// Compress and resize image using canvas
-						const canvas = document.createElement('canvas');
+						const canvas = document.createElement("canvas");
 						// Target 1920x1080 max for projector
 						const maxWidth = 1920;
 						const maxHeight = 1080;
@@ -139,108 +213,136 @@ import LyricEditor from '../components/LyricEditor.astro';
 
 						if (width > height) {
 							if (width > maxWidth) {
-								height = Math.round((height * maxWidth) / width);
+								height = Math.round(
+									(height * maxWidth) / width,
+								);
 								width = maxWidth;
 							}
 						} else {
 							if (height > maxHeight) {
-								width = Math.round((width * maxHeight) / height);
+								width = Math.round(
+									(width * maxHeight) / height,
+								);
 								height = maxHeight;
 							}
 						}
 
 						canvas.width = width;
 						canvas.height = height;
-						const ctx = canvas.getContext('2d');
+						const ctx = canvas.getContext("2d");
 						ctx?.drawImage(img, 0, 0, width, height);
 
 						// Export to base64 jpeg
-						const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+						const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
 						customBg = dataUrl;
-						
+
 						try {
-							localStorage.setItem('custom_bg', customBg);
+							localStorage.setItem("custom_bg", customBg);
 						} catch (err) {
-							console.error('Failed to save background to localStorage (might be too large)', err);
-							alert('La imagen es demasiado grande. Intenta con una de menor resolución.');
+							console.error(
+								"Failed to save background to localStorage (might be too large)",
+								err,
+							);
+							alert(
+								"La imagen es demasiado grande. Intenta con una de menor resolución.",
+							);
 							return;
 						}
 
 						bgPreview.style.backgroundImage = `url(${customBg})`;
-						channel.postMessage({ type: 'SET_BACKGROUND', image: customBg });
+						channel.postMessage({
+							type: "SET_BACKGROUND",
+							image: customBg,
+						});
 					};
 					img.src = event.target?.result as string;
 				};
 				reader.readAsDataURL(file);
 			});
 
-			searchForm?.addEventListener('submit', async (e) => {
+			searchForm?.addEventListener("submit", async (e) => {
 				e.preventDefault();
-				const artist = artistInput.value.trim().toLowerCase().replace(/ /g, '-');
-				const song = songInput.value.trim().toLowerCase().replace(/ /g, '-');
+				const artist = artistInput.value
+					.trim()
+					.toLowerCase()
+					.replace(/ /g, "-");
+				const song = songInput.value
+					.trim()
+					.toLowerCase()
+					.replace(/ /g, "-");
 
 				if (!artist || !song) return;
 
-				loadingIndicator?.classList.remove('hidden');
-				errorMessage?.classList.add('hidden');
-				editorSection?.classList.add('hidden');
-				if (songModal) songModal.classList.add('hidden');
+				loadingIndicator?.classList.remove("hidden");
+				errorMessage?.classList.add("hidden");
+				editorSection?.classList.add("hidden");
+				if (songModal) songModal.classList.add("hidden");
 
 				try {
-					const res = await fetch(`/api/lyrics/list?artist=${artist}&query=${song}`);
+					const res = await fetch(
+						`/api/lyrics/list?artist=${artist}&query=${song}`,
+					);
 					const data = await res.json();
 
 					if (!res.ok) {
-						throw new Error(data.error || 'Error buscando canciones');
+						throw new Error(
+							data.error || "Error buscando canciones",
+						);
 					}
 
 					if (data.songs.length === 0) {
-						throw new Error('No se encontraron canciones que coincidan con la búsqueda.');
+						throw new Error(
+							"No se encontraron canciones que coincidan con la búsqueda.",
+						);
 					}
 
 					// Mostrar opciones en el modal
 					if (modalList) {
-						modalList.innerHTML = '';
+						modalList.innerHTML = "";
 						data.songs.forEach((s: any) => {
-							const btn = document.createElement('button');
-							btn.className = 'w-full text-left px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium transition-colors border border-slate-600 hover:border-blue-500';
+							const btn = document.createElement("button");
+							btn.className =
+								"w-full text-left px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium transition-colors border border-slate-600 hover:border-blue-500";
 							btn.textContent = s.name;
 							btn.onclick = () => loadLyrics(artist, s.slug);
 							modalList.appendChild(btn);
 						});
 					}
-					
-					if (songModal) songModal.classList.remove('hidden');
 
+					if (songModal) songModal.classList.remove("hidden");
 				} catch (err: any) {
 					if (errorMessage) {
 						errorMessage.textContent = err.message;
-						errorMessage.classList.remove('hidden');
+						errorMessage.classList.remove("hidden");
 					}
 				} finally {
-					loadingIndicator?.classList.add('hidden');
+					loadingIndicator?.classList.add("hidden");
 				}
 			});
 
-			closeModalBtn?.addEventListener('click', () => {
-				if (songModal) songModal.classList.add('hidden');
+			closeModalBtn?.addEventListener("click", () => {
+				if (songModal) songModal.classList.add("hidden");
 			});
 
-			modalBackdrop?.addEventListener('click', () => {
-				if (songModal) songModal.classList.add('hidden');
+			modalBackdrop?.addEventListener("click", () => {
+				if (songModal) songModal.classList.add("hidden");
 			});
 
 			async function loadLyrics(artist: string, songSlug: string) {
-				if (songModal) songModal.classList.add('hidden');
-				loadingIndicator?.classList.remove('hidden');
-				errorMessage?.classList.add('hidden');
-				
+				if (songModal) songModal.classList.add("hidden");
+				loadingIndicator?.classList.remove("hidden");
+				errorMessage?.classList.add("hidden");
+
 				try {
-					const res = await fetch(`/api/lyrics/search?path=${artist}/${songSlug}`);
+					const res = await fetch(
+						`/api/lyrics/search?path=${artist}/${songSlug}`,
+					);
 					const data = await res.json();
 
 					if (!res.ok) {
-						throw new Error(data.error || 'Error cargando la letra');
+						throw new Error(
+							data.error || "Error cargando la letra",
+						);
 					}
 
 					currentVerses = data.verses;
@@ -248,92 +350,125 @@ import LyricEditor from '../components/LyricEditor.astro';
 
 					// Render the editor
 					(window as any).renderEditor(currentVerses);
-					editorSection?.classList.remove('hidden');
-					
-					// Send to projector if open
-					channel.postMessage({ type: 'LYRICS_LOADED', verses: currentVerses });
-					channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
+					editorSection?.classList.remove("hidden");
 
+					// Send to projector if open
+					channel.postMessage({
+						type: "LYRICS_LOADED",
+						verses: currentVerses,
+					});
+					channel.postMessage({
+						type: "CHANGE_SLIDE",
+						slideIndex: currentSlide,
+					});
 				} catch (err: any) {
 					if (errorMessage) {
 						errorMessage.textContent = err.message;
-						errorMessage.classList.remove('hidden');
+						errorMessage.classList.remove("hidden");
 					}
 				} finally {
-					loadingIndicator?.classList.add('hidden');
+					loadingIndicator?.classList.add("hidden");
 				}
 			}
 
-			openProjectorBtn?.addEventListener('click', () => {
+			openProjectorBtn?.addEventListener("click", () => {
 				// Open projector window with fixed dimensions
 				const projector = window.open(
-					'/popup', 
-					'Projector', 
-					'width=1920,height=1080,left=0,top=0'
+					"/popup",
+					"Projector",
+					"width=1920,height=1080,left=0,top=0",
 				);
-				
+
 				// Send current lyrics and background once it's loaded
 				if (projector) {
 					// Wait a moment for the window to load
 					setTimeout(() => {
 						if (customBg) {
-							channel.postMessage({ type: 'SET_BACKGROUND', image: customBg });
+							channel.postMessage({
+								type: "SET_BACKGROUND",
+								image: customBg,
+							});
 						}
 						if (currentVerses.length > 0) {
-							channel.postMessage({ type: 'LYRICS_LOADED', verses: currentVerses });
-							channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
+							channel.postMessage({
+								type: "LYRICS_LOADED",
+								verses: currentVerses,
+							});
+							channel.postMessage({
+								type: "CHANGE_SLIDE",
+								slideIndex: currentSlide,
+							});
 						}
 					}, 1000);
 				}
 			});
 
 			// Listen for keyboard arrows to control projection
-			window.addEventListener('keydown', (e) => {
+			window.addEventListener("keydown", (e) => {
 				if (currentVerses.length === 0) return;
-				
-				// Don't trigger if user is typing in inputs
-				if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
 
-				if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+				// Don't trigger if user is typing in inputs
+				if (
+					document.activeElement?.tagName === "INPUT" ||
+					document.activeElement?.tagName === "TEXTAREA"
+				)
+					return;
+
+				if (e.key === "ArrowRight" || e.key === "ArrowDown") {
 					e.preventDefault();
 					if (currentSlide < currentVerses.length - 1) {
 						currentSlide++;
-						channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
+						channel.postMessage({
+							type: "CHANGE_SLIDE",
+							slideIndex: currentSlide,
+						});
 						(window as any).updateActiveVerse(currentSlide);
 					}
-				} else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+				} else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
 					e.preventDefault();
 					if (currentSlide > 0) {
 						currentSlide--;
-						channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
+						channel.postMessage({
+							type: "CHANGE_SLIDE",
+							slideIndex: currentSlide,
+						});
 						(window as any).updateActiveVerse(currentSlide);
 					}
 				}
 			});
 
-			channel.addEventListener('message', (event) => {
+			channel.addEventListener("message", (event) => {
 				const data = event.data;
-				if (data.type === 'SYNC_STATE') {
+				if (data.type === "SYNC_STATE") {
 					currentSlide = data.slideIndex;
 					(window as any).updateActiveVerse(currentSlide);
 				}
 			});
 
 			// Handle custom events from LyricEditor
-			window.addEventListener('update-lyrics', (e: any) => {
+			window.addEventListener("update-lyrics", (e: any) => {
 				currentVerses = e.detail.verses;
-				channel.postMessage({ type: 'LYRICS_LOADED', verses: currentVerses });
+				channel.postMessage({
+					type: "LYRICS_LOADED",
+					verses: currentVerses,
+				});
 				// Keep current slide index in bounds
 				if (currentSlide >= currentVerses.length) {
 					currentSlide = Math.max(0, currentVerses.length - 1);
 				}
-				channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
+				channel.postMessage({
+					type: "CHANGE_SLIDE",
+					slideIndex: currentSlide,
+				});
 			});
-			
+
 			// Handle user clicking on a verse in the editor
-			window.addEventListener('jump-to-slide', (e: any) => {
+			window.addEventListener("jump-to-slide", (e: any) => {
 				currentSlide = e.detail.slideIndex;
-				channel.postMessage({ type: 'CHANGE_SLIDE', slideIndex: currentSlide });
+				channel.postMessage({
+					type: "CHANGE_SLIDE",
+					slideIndex: currentSlide,
+				});
 				(window as any).updateActiveVerse(currentSlide);
 			});
 		</script>

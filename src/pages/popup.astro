@@ -1,143 +1,183 @@
 ---
+
 ---
 
 <html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <title>Proyección de Letras</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    /* Custom styles in addition to Tailwind for smooth animations */
-    .slide-fade-enter {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    .slide-fade-enter-active {
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity 500ms ease-out, transform 500ms ease-out;
-    }
-    .slide-fade-exit {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .slide-fade-exit-active {
-      opacity: 0;
-      transform: translateY(-20px);
-      transition: opacity 500ms ease-in, transform 500ms ease-in;
-    }
-    
-    /* Neon glow effect for text */
-    .text-glow {
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(120, 180, 255, 0.3);
-    }
-  </style>
-</head>
-<body class="bg-black text-white h-screen w-screen overflow-hidden font-sans m-0 flex flex-col relative selection:bg-blue-500/30">
-  
-  <!-- Animated Background (Default) -->
-  <div id="default-bg" class="absolute inset-0 z-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-black overflow-hidden transition-opacity duration-1000">
-    <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full mix-blend-screen filter blur-3xl animate-blob"></div>
-    <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full mix-blend-screen filter blur-3xl animate-blob animation-delay-2000"></div>
-  </div>
+  <head>
+    <meta charset="utf-8" />
+    <title>Proyección de Letras</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      /* Custom styles in addition to Tailwind for smooth animations */
+      .slide-fade-enter {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      .slide-fade-enter-active {
+        opacity: 1;
+        transform: translateY(0);
+        transition:
+          opacity 500ms ease-out,
+          transform 500ms ease-out;
+      }
+      .slide-fade-exit {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .slide-fade-exit-active {
+        opacity: 0;
+        transform: translateY(-20px);
+        transition:
+          opacity 500ms ease-in,
+          transform 500ms ease-in;
+      }
 
-  <!-- Custom Image Background -->
-  <div id="custom-bg" class="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-1000 opacity-0">
-    <!-- Dark overlay to ensure text is always readable -->
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-  </div>
-
-  <!-- Content Container -->
-  <main class="relative z-10 flex-1 flex items-center justify-center p-16">
-    <div id="lyric-container" class="text-center w-full max-w-6xl">
-      <p id="lyric-text" class="text-4xl md:text-6xl lg:text-[65px] font-extrabold leading-tight tracking-tight text-glow whitespace-pre-wrap transition-all duration-500 text-white/90">
-        Esperando conexión...
-      </p>
+      /* Neon glow effect for text */
+      .text-glow {
+        text-shadow:
+          0 0 20px rgba(255, 255, 255, 0.5),
+          0 0 40px rgba(120, 180, 255, 0.3);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-black text-white h-screen w-screen overflow-hidden font-sans m-0 flex flex-col relative selection:bg-blue-500/30"
+  >
+    <!-- Animated Background (Default) -->
+    <div
+      id="default-bg"
+      class="absolute inset-0 z-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-black overflow-hidden transition-opacity duration-1000"
+    >
+      <div
+        class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full mix-blend-screen filter blur-3xl animate-blob"
+      >
+      </div>
+      <div
+        class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full mix-blend-screen filter blur-3xl animate-blob animation-delay-2000"
+      >
+      </div>
     </div>
-  </main>
 
-  <script>
-    const lyricText = document.getElementById('lyric-text');
-    const customBg = document.getElementById('custom-bg');
-    const defaultBg = document.getElementById('default-bg');
-    const channel = new BroadcastChannel('lyrics_channel');
-    
-    let verses: string[] = [];
-    let currentSlide = -1;
+    <!-- Custom Image Background -->
+    <div
+      id="custom-bg"
+      class="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-1000 opacity-0"
+    >
+      <!-- Dark overlay to ensure text is always readable -->
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    </div>
 
-    channel.onmessage = (event) => {
-      const data = event.data;
-      
-      if (data.type === 'LYRICS_LOADED') {
-        verses = data.verses;
-        // Optionally show title or "Ready"
-        if (verses.length > 0 && currentSlide === -1) {
-          updateDisplay("¡Listo para proyectar!");
-        }
-      } 
-      else if (data.type === 'CHANGE_SLIDE') {
-        currentSlide = data.slideIndex;
-        const currentVerse = verses[currentSlide];
-        if (currentVerse) {
-          const textToDisplay = typeof currentVerse === 'string' ? currentVerse : currentVerse.text;
-          updateDisplay(textToDisplay);
-        }
-      }
-      else if (data.type === 'SET_BACKGROUND') {
-        if (customBg && defaultBg && data.image) {
-          customBg.style.backgroundImage = `url(${data.image})`;
-          customBg.classList.remove('opacity-0');
-          customBg.classList.add('opacity-100');
-          // Optionally fade out default bg
-          defaultBg.classList.add('opacity-0');
-        }
-      }
-    };
+    <!-- Content Container -->
+    <main
+      class="relative z-10 flex-1 flex items-center justify-center p-4 md:p-8"
+    >
+      <div id="lyric-container" class="text-center w-full max-w-[98vw]">
+        <p
+          id="lyric-text"
+          class="text-4xl md:text-8xl lg:text-[120px] font-extrabold leading-loose tracking-tight text-glow whitespace-pre-wrap transition-all duration-500 text-white/90"
+        >
+          Esperando conexión...
+        </p>
+      </div>
+    </main>
 
-    function updateDisplay(newText: string) {
-      if (!lyricText) return;
-      
-      // Animate out
-      lyricText.classList.remove('slide-fade-enter-active');
-      lyricText.classList.add('slide-fade-exit-active');
-      
-      setTimeout(() => {
-        lyricText.textContent = newText;
-        
-        // Reset classes for animate in
-        lyricText.classList.remove('slide-fade-exit-active');
-        lyricText.classList.add('slide-fade-enter');
-        
-        // Trigger reflow
-        void lyricText.offsetWidth;
-        
-        // Animate in
-        lyricText.classList.remove('slide-fade-enter');
-        lyricText.classList.add('slide-fade-enter-active');
-      }, 300); // Matches the exit transition duration
-    }
+    <script>
+      const lyricText = document.getElementById("lyric-text");
+      const customBg = document.getElementById("custom-bg");
+      const defaultBg = document.getElementById("default-bg");
+      const channel = new BroadcastChannel("lyrics_channel");
 
-    // Allow controlling from the projector window itself as a fallback
-    window.addEventListener('keydown', (e) => {
-      if (verses.length === 0) return;
+      let verses: (string | { text: string })[] = [];
+      let currentSlide = -1;
 
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        if (currentSlide < verses.length - 1) {
-          currentSlide++;
+      channel.onmessage = (event) => {
+        const data = event.data;
+
+        if (data.type === "LYRICS_LOADED") {
+          verses = data.verses;
+          // Optionally show title or "Ready"
+          if (verses.length > 0 && currentSlide === -1) {
+            updateDisplay("¡Listo para proyectar!");
+          }
+        } else if (data.type === "CHANGE_SLIDE") {
+          currentSlide = data.slideIndex;
           const currentVerse = verses[currentSlide];
-          updateDisplay(typeof currentVerse === 'string' ? currentVerse : currentVerse.text);
-          // Sync back to main window just in case
-          channel.postMessage({ type: 'SYNC_STATE', slideIndex: currentSlide });
+          if (currentVerse) {
+            const textToDisplay =
+              typeof currentVerse === "string"
+                ? currentVerse
+                : currentVerse.text;
+            updateDisplay(textToDisplay);
+          }
+        } else if (data.type === "SET_BACKGROUND") {
+          if (customBg && defaultBg && data.image) {
+            customBg.style.backgroundImage = `url(${data.image})`;
+            customBg.classList.remove("opacity-0");
+            customBg.classList.add("opacity-100");
+            // Optionally fade out default bg
+            defaultBg.classList.add("opacity-0");
+          }
         }
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        if (currentSlide > 0) {
-          currentSlide--;
-          const currentVerse = verses[currentSlide];
-          updateDisplay(typeof currentVerse === 'string' ? currentVerse : currentVerse.text);
-          channel.postMessage({ type: 'SYNC_STATE', slideIndex: currentSlide });
-        }
+      };
+
+      function updateDisplay(newText: string) {
+        if (!lyricText) return;
+
+        // Animate out
+        lyricText.classList.remove("slide-fade-enter-active");
+        lyricText.classList.add("slide-fade-exit-active");
+
+        setTimeout(() => {
+          lyricText.textContent = newText;
+
+          // Reset classes for animate in
+          lyricText.classList.remove("slide-fade-exit-active");
+          lyricText.classList.add("slide-fade-enter");
+
+          // Trigger reflow
+          void lyricText.offsetWidth;
+
+          // Animate in
+          lyricText.classList.remove("slide-fade-enter");
+          lyricText.classList.add("slide-fade-enter-active");
+        }, 300); // Matches the exit transition duration
       }
-    });
-  </script>
-</body>
+
+      // Allow controlling from the projector window itself as a fallback
+      window.addEventListener("keydown", (e) => {
+        if (verses.length === 0) return;
+
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          if (currentSlide < verses.length - 1) {
+            currentSlide++;
+            const currentVerse = verses[currentSlide];
+            updateDisplay(
+              typeof currentVerse === "string"
+                ? currentVerse
+                : currentVerse.text,
+            );
+            // Sync back to main window just in case
+            channel.postMessage({
+              type: "SYNC_STATE",
+              slideIndex: currentSlide,
+            });
+          }
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          if (currentSlide > 0) {
+            currentSlide--;
+            const currentVerse = verses[currentSlide];
+            updateDisplay(
+              typeof currentVerse === "string"
+                ? currentVerse
+                : currentVerse.text,
+            );
+            channel.postMessage({
+              type: "SYNC_STATE",
+              slideIndex: currentSlide,
+            });
+          }
+        }
+      });
+    </script>
+  </body>
 </html>
