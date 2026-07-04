@@ -1,10 +1,27 @@
+version: '3.8'
+
 services:
-  lyrics-web:
+  app:
+    build: .
     container_name: lyrics-website-app
-    build:
-      context: .
-      dockerfile: Dockerfile
     ports:
       - "4321:4321"
+    restart: always 
 
-    restart: unless-stopped
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok-tunnel
+    restart: always
+    ports:
+      - "4040:4040"
+    volumes:
+      - ./policy.yaml:/etc/ngrok/policy.yaml
+    environment:
+      NGROK_AUTHTOKEN: "${NGROK_AUTHTOKEN}"
+    command:
+      - "http"
+      - "app:4321"
+      - "--traffic-policy-file"
+      - "/etc/ngrok/policy.yaml"
+    depends_on:
+      - app
