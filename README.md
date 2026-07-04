@@ -1,6 +1,7 @@
 # Web Lyrics Projector
 
 Un proyector de letras web dinámico y en tiempo real que te permite cargar letras de canciones y proyectarlas en una ventana separada, ideal para eventos, karaoke o presentaciones.  
+
 ![captura de ventana](public/img/home-website.png)
 
 ## Tecnologías Utilizadas
