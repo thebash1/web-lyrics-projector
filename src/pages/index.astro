@@ -30,8 +30,8 @@ import LyricEditor from "../components/LyricEditor.astro";
 				<form id="search-form" class="flex flex-col md:flex-row gap-4">
 					<input
 						type="text"
-						id="artist-input"
-						placeholder="Artista (ej. coldplay)"
+						id="dir-input"
+						placeholder="Directorio (ej. nombre de iglesia...)"
 						class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
 						required
 					/>
@@ -160,8 +160,8 @@ import LyricEditor from "../components/LyricEditor.astro";
 		<script>
 			// Client-side logic for the main page
 			const searchForm = document.getElementById("search-form");
-			const artistInput = document.getElementById(
-				"artist-input",
+			const dirInput = document.getElementById(
+				"dir-input",
 			) as HTMLInputElement;
 			const songInput = document.getElementById(
 				"song-input",
@@ -262,7 +262,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 
 			searchForm?.addEventListener("submit", async (e) => {
 				e.preventDefault();
-				const artist = artistInput.value
+				const dir = dirInput.value
 					.trim()
 					.toLowerCase()
 					.replace(/ /g, "-");
@@ -271,7 +271,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 					.toLowerCase()
 					.replace(/ /g, "-");
 
-				if (!artist || !song) return;
+				if (!dir || !song) return;
 
 				loadingIndicator?.classList.remove("hidden");
 				errorMessage?.classList.add("hidden");
@@ -280,7 +280,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 
 				try {
 					const res = await fetch(
-						`/api/lyrics/list?artist=${artist}&query=${song}`,
+						`/api/lyrics/list?dir=${dir}&query=${song}`,
 					);
 					const data = await res.json();
 
@@ -304,7 +304,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 							btn.className =
 								"w-full text-left px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium transition-colors border border-slate-600 hover:border-blue-500";
 							btn.textContent = s.name;
-							btn.onclick = () => loadLyrics(artist, s.slug);
+							btn.onclick = () => loadLyrics(dir, s.slug);
 							modalList.appendChild(btn);
 						});
 					}
@@ -328,14 +328,14 @@ import LyricEditor from "../components/LyricEditor.astro";
 				if (songModal) songModal.classList.add("hidden");
 			});
 
-			async function loadLyrics(artist: string, songSlug: string) {
+			async function loadLyrics(dir: string, songSlug: string) {
 				if (songModal) songModal.classList.add("hidden");
 				loadingIndicator?.classList.remove("hidden");
 				errorMessage?.classList.add("hidden");
 
 				try {
 					const res = await fetch(
-						`/api/lyrics/search?path=${artist}/${songSlug}`,
+						`/api/lyrics/search?path=${dir}/${songSlug}`,
 					);
 					const data = await res.json();
 
