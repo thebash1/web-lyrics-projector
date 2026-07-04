@@ -1,14 +1,10 @@
-version: '3.8'
-
 services:
-  web:
-    build: . 
-    container_name: lyrics-app 
-    stdin_open: true
-    tty: true 
-    restart: always
-    environment:
-      - HOST=0.0.0.0
-      - PORT=4321
+  lyrics-web:
+    container_name: lyrics-website-app
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "4321:4321"
+
+    restart: unless-stopped
