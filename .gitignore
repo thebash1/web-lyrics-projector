@@ -24,7 +24,7 @@ pnpm-debug.log*
 .idea/*
 
 # vsccode
-.vscode/*
+.vscode
 
 # credentials
 policy.yaml
