@@ -1,17 +1,17 @@
-FROM oven/bun:alpine AS builder
+FROM oven/bun:1-alpine
 WORKDIR /app
 
-COPY package.json ./
-RUN bun install
+COPY package.json bun.lockb* ./
+RUN bun install --frozen-lockfile
+
 COPY . .
 RUN bun run build
 
-FROM oven/bun:alpine AS runtime
-WORKDIR /app
-COPY --from=builder /app/dist ./dist
-
+# Variables de entorno para producción
 ENV HOST=0.0.0.0
 ENV PORT=4321
+NODE_ENV=production
+
 EXPOSE 4321
 
-CMD ["bun", "run", "./dist/server/entry.mjs"]
+CMD ["bun", "./dist/server/entry.mjs"]
