@@ -18,6 +18,9 @@ services:
       - ./policy.yaml:/etc/ngrok/policy.yaml
     environment:
       NGROK_AUTHTOKEN: "${NGROK_AUTHTOKEN}"
+      USER01_PASSWORD: "${USER01_PASSWORD}"
+      USER02_PASSWORD: "${USER02_PASSWORD}"
+
     command:
       - "http"
       - "app:4321"
