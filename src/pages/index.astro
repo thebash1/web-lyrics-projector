@@ -30,7 +30,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 				<form id="search-form" class="flex flex-col md:flex-row gap-4">
 					<input
 						type="text"
-						id="dir-input"
+						id="artist-input"
 						placeholder="Directorio (ej. nombre de iglesia)"
 						class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
 						required
@@ -160,8 +160,8 @@ import LyricEditor from "../components/LyricEditor.astro";
 		<script>
 			// Client-side logic for the main page
 			const searchForm = document.getElementById("search-form");
-			const dirInput = document.getElementById(
-				"dir-input",
+			const artistInput = document.getElementById(
+				"artist-input",
 			) as HTMLInputElement;
 			const songInput = document.getElementById(
 				"song-input",
@@ -262,7 +262,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 
 			searchForm?.addEventListener("submit", async (e) => {
 				e.preventDefault();
-				const dir = dirInput.value
+				const artist = artistInput.value
 					.trim()
 					.toLowerCase()
 					.replace(/ /g, "-");
@@ -271,7 +271,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 					.toLowerCase()
 					.replace(/ /g, "-");
 
-				if (!dir || !song) return;
+				if (!artist || !song) return;
 
 				loadingIndicator?.classList.remove("hidden");
 				errorMessage?.classList.add("hidden");
@@ -280,7 +280,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 
 				try {
 					const res = await fetch(
-						`/api/lyrics/list?dir=${dir}&query=${song}`,
+						`/api/lyrics/list?artist=${artist}&query=${song}`,
 					);
 					const data = await res.json();
 
@@ -304,7 +304,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 							btn.className =
 								"w-full text-left px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium transition-colors border border-slate-600 hover:border-blue-500";
 							btn.textContent = s.name;
-							btn.onclick = () => loadLyrics(dir, s.slug);
+							btn.onclick = () => loadLyrics(artist, s.slug);
 							modalList.appendChild(btn);
 						});
 					}
@@ -328,14 +328,14 @@ import LyricEditor from "../components/LyricEditor.astro";
 				if (songModal) songModal.classList.add("hidden");
 			});
 
-			async function loadLyrics(dir: string, songSlug: string) {
+			async function loadLyrics(artist: string, songSlug: string) {
 				if (songModal) songModal.classList.add("hidden");
 				loadingIndicator?.classList.remove("hidden");
 				errorMessage?.classList.add("hidden");
 
 				try {
 					const res = await fetch(
-						`/api/lyrics/search?path=${dir}/${songSlug}`,
+						`/api/lyrics/search?path=${artist}/${songSlug}`,
 					);
 					const data = await res.json();
 
