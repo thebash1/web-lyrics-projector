@@ -1,4 +1,5 @@
 import { get, set } from '../lib/cache.js';
+import { capitalizeTitle } from '../lib/textFormatting.js';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -114,9 +115,11 @@ export async function findSongsByArtist(artistSlug, songQuery) {
       .filter(file => file.endsWith('.txt'))
       .map(file => {
         const slug = file.replace('.txt', '');
+        // Usar la función de capitalización personalizada
+        const name = capitalizeTitle(slug.replace(/-/g, ' '));
         return {
           slug,
-          name: slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+          name
         };
       });
 

@@ -23,7 +23,9 @@ export function capitalizeTitle(text) {
     'espiritu santo',
     'jesucristo',
     'cristo jesús',
-    'cristo jesus'
+    'cristo jesus',
+    'te amo',
+    'te quiero'
   ];
 
   // Convertir a minúsculas primero

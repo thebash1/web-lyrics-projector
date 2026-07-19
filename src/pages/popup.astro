@@ -38,6 +38,20 @@
           0 0 20px rgba(255, 255, 255, 0.5),
           0 0 40px rgba(120, 180, 255, 0.3);
       }
+
+      /* Title styling */
+      #lyric-title {
+        font-size: clamp(2.5rem, 6vw, 60px);
+        margin-bottom: 1.5rem;
+        font-weight: 300;
+        letter-spacing: 0.05em;
+        opacity: 0.85;
+      }
+
+      /* Lyric text styling with responsive font size */
+      #lyric-text {
+        font-size: clamp(2rem, 8vw, 80px);
+      }
     </style>
   </head>
   <body
@@ -73,8 +87,14 @@
     >
       <div id="lyric-container" class="text-center w-full max-w-[98vw]">
         <p
+          id="lyric-title"
+          class="font-extrabold leading-tight tracking-tight text-glow text-white/95 transition-all duration-500 hidden"
+        >
+        </p>
+        <p
           id="lyric-text"
-          class="text-4xl md:text-6xl lg:text-[80px] font-extrabold leading-loose tracking-tight text-glow whitespace-pre-wrap transition-all duration-500 text-white/90"
+          class="font-extrabold leading-loose tracking-tight text-glow whitespace-pre-wrap transition-all duration-500 text-white/90"
+          style="max-width: 95vw; word-wrap: break-word; overflow-wrap: break-word;"
         >
           Esperando conexión...
         </p>
@@ -83,24 +103,29 @@
 
     <script>
       const lyricText = document.getElementById("lyric-text");
+      const lyricTitle = document.getElementById("lyric-title");
       const customBg = document.getElementById("custom-bg");
       const defaultBg = document.getElementById("default-bg");
       const channel = new BroadcastChannel("lyrics_channel");
 
-      let verses: (string | { text: string })[] = [];
+      let verses = [];
       let currentSlide = -1;
+      let songTitle = "";
+      let showingTitle = false;
 
       channel.onmessage = (event) => {
         const data = event.data;
 
         if (data.type === "LYRICS_LOADED") {
           verses = data.verses;
-          // Optionally show title or "Ready"
+          songTitle = data.songTitle || "";
+          // Show title first, then ready for the intro
           if (verses.length > 0 && currentSlide === -1) {
-            updateDisplay("¡Listo para proyectar!");
+            showTitle();
           }
         } else if (data.type === "CHANGE_SLIDE") {
           currentSlide = data.slideIndex;
+          showingTitle = false;
           const currentVerse = verses[currentSlide];
           if (currentVerse) {
             const textToDisplay =
@@ -120,7 +145,60 @@
         }
       };
 
-      function updateDisplay(newText: string) {
+      function showTitle() {
+        if (!lyricTitle || !songTitle) return;
+
+        lyricText.classList.remove("slide-fade-enter-active");
+        lyricText.classList.add("slide-fade-exit-active");
+
+        setTimeout(() => {
+          // Show title
+          lyricTitle.textContent = songTitle;
+          lyricTitle.classList.remove("hidden");
+          lyricTitle.classList.remove("slide-fade-exit-active");
+          lyricTitle.classList.add("slide-fade-enter");
+
+          void lyricTitle.offsetWidth;
+          lyricTitle.classList.remove("slide-fade-enter");
+          lyricTitle.classList.add("slide-fade-enter-active");
+
+          showingTitle = true;
+
+          // After 3 seconds, show the first verse
+          setTimeout(() => {
+            lyricTitle.classList.remove("slide-fade-enter-active");
+            lyricTitle.classList.add("slide-fade-exit-active");
+
+            setTimeout(() => {
+              lyricTitle.classList.add("hidden");
+              
+              // Now show the first verse
+              if (verses.length > 0) {
+                currentSlide = 0;
+                const currentVerse = verses[0];
+                const textToDisplay =
+                  typeof currentVerse === "string"
+                    ? currentVerse
+                    : currentVerse.text;
+                
+                lyricText.textContent = textToDisplay;
+                lyricText.classList.remove("slide-fade-exit-active");
+                lyricText.classList.add("slide-fade-enter");
+
+                void lyricText.offsetWidth;
+
+                lyricText.classList.remove("slide-fade-enter");
+                lyricText.classList.add("slide-fade-enter-active");
+                
+                adjustFontSize();
+                showingTitle = false;
+              }
+            }, 300);
+          }, 3000); // Show title for 3 seconds
+        }, 300);
+      }
+
+      function updateDisplay(newText) {
         if (!lyricText) return;
 
         // Animate out
@@ -140,12 +218,35 @@
           // Animate in
           lyricText.classList.remove("slide-fade-enter");
           lyricText.classList.add("slide-fade-enter-active");
+
+          // Adjust font size after rendering
+          adjustFontSize();
         }, 300); // Matches the exit transition duration
+      }
+
+      function adjustFontSize() {
+        if (!lyricText || !document.getElementById("lyric-container")) return;
+
+        const container = document.getElementById("lyric-container");
+        // Reset to max size first
+        lyricText.style.fontSize = "80px";
+
+        // Check if text overflows
+        while (
+          lyricText.scrollHeight > container.clientHeight ||
+          lyricText.scrollWidth > container.clientWidth
+        ) {
+          const currentSize = parseFloat(
+            window.getComputedStyle(lyricText).fontSize
+          );
+          if (currentSize <= 16) break; // Minimum size
+          lyricText.style.fontSize = currentSize - 2 + "px";
+        }
       }
 
       // Allow controlling from the projector window itself as a fallback
       window.addEventListener("keydown", (e) => {
-        if (verses.length === 0) return;
+        if (verses.length === 0 || showingTitle) return;
 
         if (e.key === "ArrowRight" || e.key === "ArrowDown") {
           if (currentSlide < verses.length - 1) {
@@ -154,7 +255,7 @@
             updateDisplay(
               typeof currentVerse === "string"
                 ? currentVerse
-                : currentVerse.text,
+                : currentVerse.text
             );
             // Sync back to main window just in case
             channel.postMessage({
@@ -169,7 +270,7 @@
             updateDisplay(
               typeof currentVerse === "string"
                 ? currentVerse
-                : currentVerse.text,
+                : currentVerse.text
             );
             channel.postMessage({
               type: "SYNC_STATE",
@@ -178,6 +279,9 @@
           }
         }
       });
+
+      // Adjust font size on window resize
+      window.addEventListener("resize", adjustFontSize);
     </script>
   </body>
 </html>
