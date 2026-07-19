@@ -91,7 +91,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 				<div class="flex-1 flex flex-col justify-center">
 					<button
 						id="open-projector-btn"
-						class="h-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-purple-600/30 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center text-lg"
+						class="h-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-purple-600/30 transition-all transform hover:scale-[1.02] active:scale-[0.98] disab[...]
 					>
 						Abrir Proyector (1920x1080)
 					</button>
@@ -189,6 +189,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 			let currentVerses: { text: string; section: string }[] = [];
 			let currentSlide = 0;
 			let customBg = localStorage.getItem("custom_bg") || "";
+			let currentSongTitle = "";
 
 			if (customBg) {
 				bgPreview.style.backgroundImage = `url(${customBg})`;
@@ -304,7 +305,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 							btn.className =
 								"w-full text-left px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium transition-colors border border-slate-600 hover:border-blue-500";
 							btn.textContent = s.name;
-							btn.onclick = () => loadLyrics(artist, s.slug);
+							btn.onclick = () => loadLyrics(artist, s.slug, s.name);
 							modalList.appendChild(btn);
 						});
 					}
@@ -328,7 +329,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 				if (songModal) songModal.classList.add("hidden");
 			});
 
-			async function loadLyrics(artist: string, songSlug: string) {
+			async function loadLyrics(artist: string, songSlug: string, songName: string) {
 				if (songModal) songModal.classList.add("hidden");
 				loadingIndicator?.classList.remove("hidden");
 				errorMessage?.classList.add("hidden");
@@ -347,6 +348,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 
 					currentVerses = data.verses;
 					currentSlide = 0;
+					currentSongTitle = songName;
 
 					// Render the editor
 					(window as any).renderEditor(currentVerses);
@@ -356,6 +358,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 					channel.postMessage({
 						type: "LYRICS_LOADED",
 						verses: currentVerses,
+						songTitle: currentSongTitle,
 					});
 					channel.postMessage({
 						type: "CHANGE_SLIDE",
@@ -393,6 +396,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 							channel.postMessage({
 								type: "LYRICS_LOADED",
 								verses: currentVerses,
+								songTitle: currentSongTitle,
 							});
 							channel.postMessage({
 								type: "CHANGE_SLIDE",
@@ -451,6 +455,7 @@ import LyricEditor from "../components/LyricEditor.astro";
 				channel.postMessage({
 					type: "LYRICS_LOADED",
 					verses: currentVerses,
+					songTitle: currentSongTitle,
 				});
 				// Keep current slide index in bounds
 				if (currentSlide >= currentVerses.length) {
